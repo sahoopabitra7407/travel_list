@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANDERLIST | Your World. Your Dreams. Your Next Adventure.</title>
+    <meta name="description" content="Collect places. Create memories. Explore the world. Track your travel bucket list with Wanderlist.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet.js Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Custom Style sheet -->
+    <!-- Google Font: League Spartan -->
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Design Tokens -->
+    <link rel="stylesheet" href="/css/design-tokens.css">
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/hero.css">
+    <link rel="stylesheet" href="/css/services.css">
+    <link rel="stylesheet" href="/css/portfolio.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/badge.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="dark-theme">
+    <!-- Sticky Navbar -->
+    <header class="navbar glass">
+        <div class="brand" onclick="scrollToSection('hero')">
+            <span class="brand-plane"><i class="fa-solid fa-plane-departure"></i></span>
+            <div class="brand-text">
+                <h1>WANDERLIST</h1>
+                <p>Your World. Your Dreams.</p>
+            </div>
+        </div>
+
+        <nav class="nav-links">
+            <a href="#hero" class="nav-link active">Home</a>
+            <a href="#map-section" class="nav-link">Explore</a>
+            <a href="#bucket-list" class="nav-link">Bucket List</a>
+            <a href="#timeline-section" class="nav-link">Journey</a>
+            <a href="#goals-section" class="nav-link">Goals</a>
+            <a href="#memories-section" class="nav-link">Memories</a>
+        </nav>
+
+        <div class="nav-right">
+            <button id="theme-toggle" class="icon-btn" title="Switch Theme">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <div class="profile-icon">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-bg" style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80');"></div>
+        
+        <div class="floating-elements">
+            <div class="plane-animation"><i class="fa-solid fa-paper-plane"></i></div>
+            <div class="particle p1"></div>
+            <div class="particle p2"></div>
+        </div>
+
+        <div class="hero-content">
+            <span class="hero-subtitle">WANDERLIST Travel Bucket List</span>
+            <h2 class="hero-title">YOUR NEXT ADVENTURE<br>IS WAITING.</h2>
+            <p class="hero-tagline">Collect places. Create memories. Explore the world.</p>
+            
+            <div class="hero-actions">
+                <button id="add-destination-btn" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-plus"></i> Add Destination
+                </button>
+                <button id="surprise-me-btn" class="btn btn-secondary btn-lg">
+                    <i class="fa-solid fa-dice"></i> Surprise Me
+                </button>
+            </div>
+        </div>
+    </section>
+
+<!-- Services Section -->
+<section id="services" class="services-section reveal-up">
+  <div class="app-container">
+    <div class="section-header center">
+      <span class="section-tag">Our Services</span>
+      <h2>WHAT WE OFFER</h2>
+    </div>
+    <div class="service-grid">
+      <div class="service-card glass">
+        <div class="icon"><i class="fa-solid fa-plane"></i></div>
+        <h3>FLIGHT BOOKING</h3>
+        <p>Find and reserve the best flights for your adventures.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="icon"><i class="fa-solid fa-hotel"></i></div>
+        <h3>HOTEL RESERVATION</h3>
+        <p>Secure comfortable stays at top destinations.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="icon"><i class="fa-solid fa-map"></i></div>
+        <h3>TRIP PLANNING</h3>
+        <p>Tailor-made itineraries to suit any travel style.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- Travel Statistics Panel -->
+    <section id="stats" class="stats-container app-container">
+        <div class="stat-card glass hover-lift">
+            <div class="stat-icon icon-countries"><i class="fa-solid fa-earth-americas"></i></div>
+            <div class="stat-info">
+                <h3 id="stat-countries" class="counter">0</h3>
+                <p>Countries Visited</p>
+            </div>
+        </div>
+
+        <div class="stat-card glass hover-lift">
+            <div class="stat-icon icon-destinations"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="stat-info">
+                <h3 id="stat-total" class="counter">0</h3>
+                <p>Destinations Listed</p>
+            </div>
+        </div>
+
+        <div class="stat-card glass hover-lift">
+            <div class="stat-icon icon-wishlist"><i class="fa-solid fa-heart"></i></div>
+            <div class="stat-info">
+                <h3 id="stat-wishlist" class="counter">0</h3>
+                <p>Wishlist Dreams</p>
+            </div>
+        </div>
+
+        <div class="stat-card glass hover-lift">
+            <div class="stat-icon icon-visited"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-info">
+                <h3 id="stat-visited" class="counter">0</h3>
+                <p>Places Explored</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- World Map Section -->
+    <section id="map-section" class="map-section app-container">
+        <div class="section-header">
+            <span class="section-tag">Interactive Map</span>
+            <h2>EXPLORE YOUR WORLD</h2>
+            <p class="section-desc">Every pin represents a dream, a journey, or a memory.</p>
+        </div>
+
+        <div class="map-wrapper glass">
+            <div id="world-map" class="world-map"></div>
+            <div class="map-legend">
+                <div class="legend-item"><span class="legend-dot badge-wishlist"></span> Wishlist</div>
+                <div class="legend-item"><span class="legend-dot badge-planned"></span> Planned</div>
+                <div class="legend-item"><span class="legend-dot badge-visited"></span> Visited</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mood Discovery Section -->
+    <section id="moods" class="moods-section app-container">
+        <div class="section-header center">
+            <span class="section-tag">Inspiration Engine</span>
+            <h2>HOW DO YOU WANT TO FEEL?</h2>
+            <p class="section-desc">Choose your travel mood to discover tailor-made destinations.</p>
+        </div>
+
+        <div class="mood-grid">
+            <div class="mood-card glass active" data-mood="ALL">
+                <div class="mood-icon">🌍</div>
+                <h4>All Moods</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Adventure">
+                <div class="mood-icon">🏔</div>
+                <h4>Adventure</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Relaxation">
+                <div class="mood-icon">🏖</div>
+                <h4>Relaxation</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Food">
+                <div class="mood-icon">🍜</div>
+                <h4>Food & Dining</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Culture">
+                <div class="mood-icon">🏛</div>
+                <h4>Culture</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Nature">
+                <div class="mood-icon">🌲</div>
+                <h4>Nature</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Nightlife">
+                <div class="mood-icon">🌃</div>
+                <h4>Nightlife</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Romantic">
+                <div class="mood-icon">❤️</div>
+                <h4>Romantic</h4>
+            </div>
+            <div class="mood-card glass" data-mood="Photography">
+                <div class="mood-icon">📸</div>
+                <h4>Photography</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bucket List Grid -->
+    <section id="bucket-list" class="bucket-list-section app-container">
+        <div class="section-header">
+            <span class="section-tag">Wanderlist Directory</span>
+            <h2>MY BUCKET LIST</h2>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="controls-bar glass">
+            <div class="filter-tabs">
+                <button class="tab-btn active" data-status="ALL">All</button>
+                <button class="tab-btn" data-status="WISHLIST">Wishlist</button>
+                <button class="tab-btn" data-status="PLANNED">Planned</button>
+                <button class="tab-btn" data-status="VISITED">Visited</button>
+            </div>
+
+            <div class="filter-options">
+                <div class="select-wrapper">
+                    <i class="fa-solid fa-tags select-icon"></i>
+                    <select id="category-filter">
+                        <option value="ALL">All Categories</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Beach">Beach</option>
+                        <option value="Culture">Culture</option>
+                        <option value="Nature">Nature</option>
+                        <option value="Mountain">Mountain</option>
+                        <option value="Food">Food</option>
+                        <option value="Romantic">Romantic</option>
+                        <option value="City">City</option>
+                        <option value="Wildlife">Wildlife</option>
+                        <option value="Photography">Photography</option>
+                    </select>
+                </div>
+
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search destinations...">
+                    <button id="clear-search" class="clear-btn" hidden><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Destinations Grid / Skeleton Loader -->
+        <div id="destinations-grid" class="destinations-grid">
+            <!-- Dynamic cards served here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state glass hidden">
+            <div class="empty-icon"><i class="fa-solid fa-compass"></i></div>
+            <h3>No adventures found here</h3>
+            <p>Ready to start planning? Add a new destination card to begin your journey.</p>
+            <button id="empty-add-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add First Destination</button>
+        </div>
+    </section>
+
+    <!-- Travel Timeline Journey -->
+    <section id="timeline-section" class="timeline-section app-container">
+        <div class="section-header center">
+            <span class="section-tag">Travel Chronicle</span>
+            <h2>YOUR TRAVEL JOURNEY</h2>
+            <p class="section-desc">Revisit your footprints and track your upcoming routes.</p>
+        </div>
+
+        <div class="timeline-container">
+            <div id="journey-timeline" class="journey-timeline">
+                <!-- Timeline milestones injected here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Goals Tracker & Achievements Panel -->
+    <section id="goals-section" class="goals-section app-container">
+        <div class="goals-layout">
+            <!-- Active Goals -->
+            <div class="goals-panel glass">
+                <div class="panel-header">
+                    <h3><i class="fa-solid fa-bullseye"></i> Travel Goals</h3>
+                    <button id="add-goal-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Add Goal</button>
+                </div>
+                <div id="goals-list" class="goals-list">
+                    <!-- Dynamic Goals progress bars -->
+                </div>
+            </div>
+
+            <!-- Achievements Unlocks -->
+            <div class="achievements-panel glass">
+                <div class="panel-header">
+                    <h3><i class="fa-solid fa-award"></i> Travel Achievements</h3>
+                </div>
+                <div class="achievements-grid">
+                    <div id="ach-first" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-plane"></i></div>
+                        <div class="ach-text">
+                            <h4>First Adventure</h4>
+                            <p>Added a bucket list item</p>
+                        </div>
+                    </div>
+                    <div id="ach-globe" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-globe"></i></div>
+                        <div class="ach-text">
+                            <h4>Globetrotter</h4>
+                            <p>Visit 5 countries</p>
+                        </div>
+                    </div>
+                    <div id="ach-mountain" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-mountain"></i></div>
+                        <div class="ach-text">
+                            <h4>Mountain Soul</h4>
+                            <p>Visit 3 mountain trips</p>
+                        </div>
+                    </div>
+                    <div id="ach-beach" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-umbrella-beach"></i></div>
+                        <div class="ach-text">
+                            <h4>Beach Lover</h4>
+                            <p>Visit 5 beaches</p>
+                        </div>
+                    </div>
+                    <div id="ach-memory" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-camera-retro"></i></div>
+                        <div class="ach-text">
+                            <h4>Memory Maker</h4>
+                            <p>Save 5 travel memories</p>
+                        </div>
+                    </div>
+                    <div id="ach-crusher" class="achievement-card locked">
+                        <div class="ach-icon"><i class="fa-solid fa-fire"></i></div>
+                        <div class="ach-text">
+                            <h4>Bucket Crusher</h4>
+                            <p>Explore 10 destinations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Travel Memory Pinboard Wall -->
+    <section id="memories-section" class="memories-section app-container">
+        <div class="section-header">
+            <span class="section-tag">Pinterest Board</span>
+            <h2>MEMORIES FROM THE ROAD</h2>
+            <p class="section-desc">Snapshots of moments captured across the world.</p>
+            <button id="add-memory-btn" class="btn btn-primary" style="margin-top: 14px;">
+                <i class="fa-solid fa-camera"></i> Add Memory
+            </button>
+        </div>
+
+        <div id="memories-masonry" class="memories-masonry">
+            <!-- Dynamic memories gallery grid -->
+        </div>
+    </section>
+
+    <!-- Full screen / Destination Details Modal -->
+    <div id="details-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass details-modal-content animate-pop">
+            <button id="details-close-btn" class="icon-btn modal-close-pos"><i class="fa-solid fa-xmark"></i></button>
+            <div id="details-hero" class="details-hero">
+                <div class="details-hero-overlay"></div>
+                <div class="details-title-wrapper">
+                    <span id="details-country-tag"></span>
+                    <h2 id="details-title"></h2>
+                    <p id="details-city-tag"></p>
+                </div>
+            </div>
+
+            <div class="details-body">
+                <div class="details-main-info">
+                    <div class="details-meta-card">
+                        <div class="meta-icon"><i class="fa-solid fa-compass"></i></div>
+                        <div>
+                            <h5>Category & Mood</h5>
+                            <p id="details-category-mood"></p>
+                        </div>
+                    </div>
+                    <div class="details-meta-card">
+                        <div class="meta-icon"><i class="fa-solid fa-cloud-sun"></i></div>
+                        <div>
+                            <h5>Best Season</h5>
+                            <p id="details-season"></p>
+                        </div>
+                    </div>
+                    <div class="details-meta-card">
+                        <div class="meta-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div>
+                            <h5>Duration</h5>
+                            <p id="details-duration"></p>
+                        </div>
+                    </div>
+                    <div class="details-meta-card">
+                        <div class="meta-icon"><i class="fa-solid fa-wallet"></i></div>
+                        <div>
+                            <h5>Budget Goal</h5>
+                            <p id="details-budget"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-content-row">
+                    <div class="details-description">
+                        <h4>About Destination</h4>
+                        <p id="details-desc-text"></p>
+                        <div class="details-actions">
+                            <button id="details-status-toggle" class="btn btn-primary"></button>
+                            <button id="details-edit-btn" class="btn btn-secondary"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button id="details-delete-btn" class="btn btn-outline"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+
+                    <!-- Visual budget estimator -->
+                    <div class="details-budget-planner">
+                        <div class="budget-header">
+                            <h4>Trip Budget Planner</h4>
+                            <button id="add-expense-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Expense</button>
+                        </div>
+                        <div id="expense-list-container" class="expense-list-container">
+                            <!-- Expense breakdown items -->
+                        </div>
+                        <div class="budget-summary-panel">
+                            <div>
+                                <span>Estimated</span>
+                                <h4 id="expense-est-total">$0</h4>
+                            </div>
+                            <div>
+                                <span>Actual Spent</span>
+                                <h4 id="expense-act-total">$0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Surprise Me Modal -->
+    <div id="surprise-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass surprise-content animate-pop">
+            <button id="surprise-close-btn" class="icon-btn modal-close-pos"><i class="fa-solid fa-xmark"></i></button>
+            <div class="spin-wheel-container">
+                <div id="wheel-loader" class="wheel-loader"><i class="fa-solid fa-compass fa-spin"></i></div>
+                <h3 id="wheel-text">Spinning the globe...</h3>
+            </div>
+            
+            <div id="surprise-result" class="surprise-result hidden">
+                <img id="surprise-img" src="" alt="Destination">
+                <div class="surprise-info">
+                    <span id="surprise-country"></span>
+                    <h3 id="surprise-title"></h3>
+                    <p id="surprise-description"></p>
+                    <div class="surprise-meta">
+                        <span><i class="fa-solid fa-cloud-sun"></i> <strong id="surprise-season"></strong></span>
+                        <span><i class="fa-solid fa-wallet"></i> <strong id="surprise-budget"></strong></span>
+                    </div>
+                    <div class="surprise-actions">
+                        <button id="surprise-plan-btn" class="btn btn-primary">Add to Planned</button>
+                        <button id="surprise-view-btn" class="btn btn-secondary">View Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create / Edit Destination Modal -->
+    <div id="destination-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass animate-pop">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fa-solid fa-map-pin"></i> Add New Destination</h2>
+                <button id="modal-close-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="destination-form" class="modal-form">
+                <input type="hidden" id="form-id">
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="form-title">Destination Title *</label>
+                        <input type="text" id="form-title" placeholder="e.g. Cherry Blossom Dreams" required>
+                    </div>
+                </div>
+
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="form-country">Country *</label>
+                        <input type="text" id="form-country" placeholder="e.g. Japan" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-city">City / Region</label>
+                        <input type="text" id="form-city" placeholder="e.g. Kyoto">
+                    </div>
+                </div>
+
+                <div class="form-row three-col">
+                    <div class="form-group">
+                        <label for="form-category">Category</label>
+                        <select id="form-category">
+                            <option value="Adventure">Adventure</option>
+                            <option value="Beach">Beach</option>
+                            <option value="Culture">Culture</option>
+                            <option value="Nature">Nature</option>
+                            <option value="Mountain">Mountain</option>
+                            <option value="Food">Food</option>
+                            <option value="Romantic">Romantic</option>
+                            <option value="City">City</option>
+                            <option value="Wildlife">Wildlife</option>
+                            <option value="Photography">Photography</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-mood">Mood</label>
+                        <select id="form-mood">
+                            <option value="Adventure">Adventure</option>
+                            <option value="Relaxation">Relaxation</option>
+                            <option value="Food">Food & Dining</option>
+                            <option value="Culture">Culture</option>
+                            <option value="Nature">Nature</option>
+                            <option value="Nightlife">Nightlife</option>
+                            <option value="Romantic">Romantic</option>
+                            <option value="Photography">Photography</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-status">Status</label>
+                        <select id="form-status">
+                            <option value="WISHLIST">Wishlist</option>
+                            <option value="PLANNED">Planned</option>
+                            <option value="VISITED">Visited</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label for="form-target-date">Target Date</label>
+                        <input type="text" id="form-target-date" placeholder="e.g. Spring 2027">
+                    </div>
+                </div>
+
+                <div class="form-row three-col">
+                    <div class="form-group">
+                        <label for="form-budget">Est. Budget ($ USD)</label>
+                        <input type="number" id="form-budget" placeholder="e.g. 2500" step="50" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-season">Best Season</label>
+                        <input type="text" id="form-season" placeholder="e.g. Mar–Apr">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-duration">Duration</label>
+                        <input type="text" id="form-duration" placeholder="e.g. 5–7 days">
+                    </div>
+                </div>
+
+                <div class="form-row three-col">
+                    <div class="form-group">
+                        <label for="form-latitude">Latitude</label>
+                        <input type="number" id="form-latitude" placeholder="e.g. 35.0116" step="0.0001">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-longitude">Longitude</label>
+                        <input type="number" id="form-longitude" placeholder="e.g. 135.7681" step="0.0001">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-rating">Rating</label>
+                        <select id="form-rating">
+                            <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
+                            <option value="3">⭐⭐⭐ (3 Stars)</option>
+                            <option value="2">⭐⭐ (2 Stars)</option>
+                            <option value="1">⭐ (1 Star)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label for="form-image-url">Cover Image URL</label>
+                        <input type="url" id="form-image-url" placeholder="https://images.unsplash.com/...">
+                    </div>
+                </div>
+
+                <div class="form-row full-width">
+                    <div class="form-group">
+                        <label for="form-description">Description & Notes</label>
+                        <textarea id="form-description" rows="3" placeholder="What makes this destination special?"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="modal-cancel-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Destination</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Goal Modal -->
+    <div id="goal-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass animate-pop" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>Add Travel Goal</h2>
+                <button id="goal-close-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="goal-form" class="modal-form">
+                <input type="hidden" id="goal-form-id">
+                <div class="form-group">
+                    <label for="goal-title">Goal Title *</label>
+                    <input type="text" id="goal-title" placeholder="e.g. Visit 5 countries" required>
+                </div>
+                <div class="form-group">
+                    <label for="goal-desc">Description</label>
+                    <input type="text" id="goal-desc" placeholder="e.g. Explore across continents">
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label for="goal-target">Target Count</label>
+                        <input type="number" id="goal-target" min="1" value="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goal-completed">Completed Count</label>
+                        <input type="number" id="goal-completed" min="0" value="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="goal-category">Category / Tag</label>
+                    <input type="text" id="goal-category" placeholder="e.g. Globetrotter">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="goal-cancel-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Memory Modal -->
+    <div id="memory-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass animate-pop" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>Add Travel Memory</h2>
+                <button id="memory-close-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="memory-form" class="modal-form">
+                <div class="form-group">
+                    <label for="memory-dest-select">Select Destination *</label>
+                    <select id="memory-dest-select" required>
+                        <!-- Injected dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="memory-caption">Caption *</label>
+                    <input type="text" id="memory-caption" placeholder="Describe the memory..." required>
+                </div>
+                <div class="form-group">
+                    <label for="memory-image-url">Image URL *</label>
+                    <input type="url" id="memory-image-url" placeholder="https://images.unsplash.com/..." required>
+                </div>
+                <div class="form-group">
+                    <label for="memory-date">Memory Date</label>
+                    <input type="text" id="memory-date" placeholder="e.g. Oct 2023">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="memory-cancel-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Memory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Expense Modal -->
+    <div id="expense-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass animate-pop" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Add Trip Expense</h2>
+                <button id="expense-close-btn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="expense-form" class="modal-form">
+                <input type="hidden" id="expense-dest-id">
+                <div class="form-group">
+                    <label for="expense-category">Category *</label>
+                    <select id="expense-category" required>
+                        <option value="Flights">Flights</option>
+                        <option value="Hotel">Hotel</option>
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Activities">Activities</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expense-estimated">Estimated Amount ($) *</label>
+                    <input type="number" id="expense-estimated" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense-actual">Actual Amount ($) *</label>
+                    <input type="number" id="expense-actual" min="0" step="1" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="expense-cancel-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Logic javascript sheet -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
