@@ -475,6 +475,10 @@ body.dark-theme::before {
     background: #111a2e !important;
 }
 
+body.light-theme .world-map {
+    background: #e2e8f0 !important;
+}
+
 .map-legend {
     position: absolute;
     bottom: 24px;
@@ -489,6 +493,11 @@ body.dark-theme::before {
     gap: 16px;
 }
 
+body.light-theme .map-legend {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
 .legend-item {
     display: flex;
     align-items: center;
@@ -496,6 +505,10 @@ body.dark-theme::before {
     font-size: 12px;
     font-weight: 600;
     color: #fff;
+}
+
+body.light-theme .legend-item {
+    color: #1e293b;
 }
 
 .legend-dot {

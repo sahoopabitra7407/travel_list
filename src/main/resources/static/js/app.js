@@ -265,6 +265,33 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========================================================================
        MAP MANAGEMENT (LEAFLET)
        ========================================================================== */
+    let currentTileLayers = [];
+
+    function updateMapTileLayer() {
+        if (!map) return;
+        currentTileLayers.forEach(l => map.removeLayer(l));
+        currentTileLayers = [];
+
+        const isLight = document.body.classList.contains('light-theme');
+        if (isLight) {
+            const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(map);
+            currentTileLayers.push(osm);
+        } else {
+            const esriBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+                maxZoom: 16
+            }).addTo(map);
+            const esriRef = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '',
+                maxZoom: 16
+            }).addTo(map);
+            currentTileLayers.push(esriBase, esriRef);
+        }
+    }
+
     function initMap() {
         if (map) return;
         // Centralize map viewport
@@ -275,10 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maxZoom: 10
         });
 
-        // Dark-mode themed tiles using open CartoDB tile service
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-        }).addTo(map);
+        updateMapTileLayer();
     }
 
     function updateMapMarkers() {
@@ -932,6 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggleBtn.innerHTML = `<i class="fa-solid fa-sun"></i>`;
             localStorage.setItem('theme', 'dark');
         }
+        updateMapTileLayer();
     }
 
     /* ==========================================================================
