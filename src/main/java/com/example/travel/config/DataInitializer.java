@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class DataInitializer {
@@ -153,31 +154,35 @@ public class DataInitializer {
                         .longitude(-115.5708)
                         .build();
 
-                destinationRepository.saveAll(Arrays.asList(kyoto, santorini, machuPicchu, tromso, cairo, paris, banff));
+                List<Destination> saved = destinationRepository.saveAll(Arrays.asList(kyoto, santorini, machuPicchu, tromso, cairo, paris, banff));
+                Long kyotoId = saved.get(0).getId();
+                Long cairoId = saved.get(4).getId();
+                Long parisId = saved.get(5).getId();
+                Long banffId = saved.get(6).getId();
 
                 // 2. Initialize Trip Expenses (for Visited or Planned items)
                 // Kyoto expenses (Planned)
                 expenseRepository.saveAll(Arrays.asList(
-                    TripExpense.builder().destinationId(1L).category("Flights").estimatedAmount(1200.0).actualAmount(0.0).build(),
-                    TripExpense.builder().destinationId(1L).category("Hotel").estimatedAmount(1000.0).actualAmount(0.0).build(),
-                    TripExpense.builder().destinationId(1L).category("Food").estimatedAmount(400.0).actualAmount(0.0).build(),
-                    TripExpense.builder().destinationId(1L).category("Transport").estimatedAmount(300.0).actualAmount(0.0).build(),
-                    TripExpense.builder().destinationId(1L).category("Activities").estimatedAmount(300.0).actualAmount(0.0).build()
+                    TripExpense.builder().destinationId(kyotoId).category("Flights").estimatedAmount(1200.0).actualAmount(0.0).build(),
+                    TripExpense.builder().destinationId(kyotoId).category("Hotel").estimatedAmount(1000.0).actualAmount(0.0).build(),
+                    TripExpense.builder().destinationId(kyotoId).category("Food").estimatedAmount(400.0).actualAmount(0.0).build(),
+                    TripExpense.builder().destinationId(kyotoId).category("Transport").estimatedAmount(300.0).actualAmount(0.0).build(),
+                    TripExpense.builder().destinationId(kyotoId).category("Activities").estimatedAmount(300.0).actualAmount(0.0).build()
                 ));
 
                 // Paris expenses (Visited)
                 expenseRepository.saveAll(Arrays.asList(
-                    TripExpense.builder().destinationId(6L).category("Flights").estimatedAmount(900.0).actualAmount(850.0).build(),
-                    TripExpense.builder().destinationId(6L).category("Hotel").estimatedAmount(1100.0).actualAmount(1150.0).build(),
-                    TripExpense.builder().destinationId(6L).category("Food").estimatedAmount(350.0).actualAmount(400.0).build(),
-                    TripExpense.builder().destinationId(6L).category("Activities").estimatedAmount(250.0).actualAmount(200.0).build()
+                    TripExpense.builder().destinationId(parisId).category("Flights").estimatedAmount(900.0).actualAmount(850.0).build(),
+                    TripExpense.builder().destinationId(parisId).category("Hotel").estimatedAmount(1100.0).actualAmount(1150.0).build(),
+                    TripExpense.builder().destinationId(parisId).category("Food").estimatedAmount(350.0).actualAmount(400.0).build(),
+                    TripExpense.builder().destinationId(parisId).category("Activities").estimatedAmount(250.0).actualAmount(200.0).build()
                 ));
 
                 // 3. Initialize Travel Memories (Pinterest wall)
                 memoryRepository.saveAll(Arrays.asList(
-                    TravelMemory.builder().destinationId(5L).caption("Gazing at the great Sphinx in Cairo").imageUrl("https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=800&q=80").memoryDate("Oct 2023").build(),
-                    TravelMemory.builder().destinationId(6L).caption("Sparkling Eiffel Tower under Parisian skies").imageUrl("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80").memoryDate("Apr 2024").build(),
-                    TravelMemory.builder().destinationId(7L).caption("Beautiful turquoise waters of Lake Louise in Banff").imageUrl("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80").memoryDate("Aug 2022").build()
+                    TravelMemory.builder().destinationId(cairoId).caption("Gazing at the great Sphinx in Cairo").imageUrl("https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=800&q=80").memoryDate("Oct 2023").build(),
+                    TravelMemory.builder().destinationId(parisId).caption("Sparkling Eiffel Tower under Parisian skies").imageUrl("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80").memoryDate("Apr 2024").build(),
+                    TravelMemory.builder().destinationId(banffId).caption("Beautiful turquoise waters of Lake Louise in Banff").imageUrl("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80").memoryDate("Aug 2022").build()
                 ));
             }
 

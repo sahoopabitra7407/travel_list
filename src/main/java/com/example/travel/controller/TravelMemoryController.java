@@ -26,18 +26,32 @@ public class TravelMemoryController {
         return repository.findByDestinationId(destinationId);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TravelMemory> getMemoryById(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
-    public TravelMemory createMemory(@RequestBody TravelMemory memory) {
-        return repository.save(memory);
+    public ResponseEntity<TravelMemory> createMemory(@RequestBody TravelMemory memory) {
+        if (memory == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        memory.setId(null);
+        return ResponseEntity.ok(repository.save(memory));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TravelMemory> updateMemory(@PathVariable Long id, @RequestBody TravelMemory updated) {
+        if (updated == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return repository.findById(id).map(existing -> {
-            existing.setDestinationId(updated.getDestinationId());
-            existing.setCaption(updated.getCaption());
-            existing.setImageUrl(updated.getImageUrl());
-            existing.setMemoryDate(updated.getMemoryDate());
+            if (updated.getDestinationId() != null) existing.setDestinationId(updated.getDestinationId());
+            if (updated.getCaption() != null) existing.setCaption(updated.getCaption());
+            if (updated.getImageUrl() != null) existing.setImageUrl(updated.getImageUrl());
+            if (updated.getMemoryDate() != null) existing.setMemoryDate(updated.getMemoryDate());
             return ResponseEntity.ok(repository.save(existing));
         }).orElse(ResponseEntity.notFound().build());
     }

@@ -2,12 +2,14 @@ package com.example.travel.controller;
 
 import com.example.travel.model.Destination;
 import com.example.travel.repository.DestinationRepository;
+import com.example.travel.repository.TravelMemoryRepository;
+import com.example.travel.repository.TripExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-
 
 @RestController
 @RequestMapping("/api/destinations")
@@ -16,6 +18,12 @@ public class DestinationController {
 
     @Autowired
     private DestinationRepository repository;
+
+    @Autowired
+    private TripExpenseRepository expenseRepository;
+
+    @Autowired
+    private TravelMemoryRepository memoryRepository;
 
     @GetMapping
     public List<Destination> getAllDestinations(
@@ -47,36 +55,49 @@ public class DestinationController {
     }
 
     @PostMapping
-    public Destination createDestination(@RequestBody Destination destination) {
-        return repository.save(destination);
+    public ResponseEntity<Destination> createDestination(@RequestBody Destination destination) {
+        if (destination == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        destination.setId(null);
+        if (destination.getStatus() == null || destination.getStatus().trim().isEmpty()) {
+            destination.setStatus("WISHLIST");
+        }
+        return ResponseEntity.ok(repository.save(destination));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Destination> updateDestination(@PathVariable Long id, @RequestBody Destination updated) {
+        if (updated == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return repository.findById(id).map(existing -> {
-            existing.setTitle(updated.getTitle());
-            existing.setCountry(updated.getCountry());
-            existing.setCity(updated.getCity());
-            existing.setDescription(updated.getDescription());
-            existing.setCategory(updated.getCategory());
-            existing.setMood(updated.getMood());
-            existing.setTargetDate(updated.getTargetDate());
-            existing.setStatus(updated.getStatus());
-            existing.setRating(updated.getRating());
-            existing.setImageUrl(updated.getImageUrl());
-            existing.setBudget(updated.getBudget());
-            existing.setBestSeason(updated.getBestSeason());
-            existing.setDuration(updated.getDuration());
-            existing.setLatitude(updated.getLatitude());
-            existing.setLongitude(updated.getLongitude());
+            if (updated.getTitle() != null) existing.setTitle(updated.getTitle());
+            if (updated.getCountry() != null) existing.setCountry(updated.getCountry());
+            if (updated.getCity() != null) existing.setCity(updated.getCity());
+            if (updated.getDescription() != null) existing.setDescription(updated.getDescription());
+            if (updated.getCategory() != null) existing.setCategory(updated.getCategory());
+            if (updated.getMood() != null) existing.setMood(updated.getMood());
+            if (updated.getTargetDate() != null) existing.setTargetDate(updated.getTargetDate());
+            if (updated.getStatus() != null) existing.setStatus(updated.getStatus());
+            if (updated.getRating() != null) existing.setRating(updated.getRating());
+            if (updated.getImageUrl() != null) existing.setImageUrl(updated.getImageUrl());
+            if (updated.getBudget() != null) existing.setBudget(updated.getBudget());
+            if (updated.getBestSeason() != null) existing.setBestSeason(updated.getBestSeason());
+            if (updated.getDuration() != null) existing.setDuration(updated.getDuration());
+            if (updated.getLatitude() != null) existing.setLatitude(updated.getLatitude());
+            if (updated.getLongitude() != null) existing.setLongitude(updated.getLongitude());
             return ResponseEntity.ok(repository.save(existing));
         }).orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Destination> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
-        String newStatus = payload.get("status");
-        if (newStatus == null) {
+    public ResponseEntity<Destination> updateStatus(@PathVariable Long id, @RequestBody(required = false) Map<String, String> payload) {
+        if (payload == null || !payload.containsKey("status") || payload.get("status") == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        String newStatus = payload.get("status").trim();
+        if (newStatus.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         return repository.findById(id).map(existing -> {
@@ -85,9 +106,12 @@ public class DestinationController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDestination(@PathVariable Long id) {
         if (repository.existsById(id)) {
+            expenseRepository.deleteByDestinationId(id);
+            memoryRepository.deleteByDestinationId(id);
             repository.deleteById(id);
             return ResponseEntity.ok().build();
         }
@@ -103,10 +127,13 @@ public class DestinationController {
         long visited = all.stream().filter(d -> "VISITED".equalsIgnoreCase(d.getStatus())).count();
         double totalBudget = all.stream().mapToDouble(d -> d.getBudget() != null ? d.getBudget().doubleValue() : 0.0).sum();
         
-        // Count distinct countries
+        // Count distinct countries null-safely
         long countriesCount = all.stream()
-                .map(d -> d.getCountry().trim().toLowerCase())
+                .map(Destination::getCountry)
+                .filter(Objects::nonNull)
+                .map(String::trim)
                 .filter(c -> !c.isEmpty())
+                .map(String::toLowerCase)
                 .distinct()
                 .count();
 

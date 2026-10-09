@@ -29,18 +29,31 @@ public class TravelGoalController {
     }
 
     @PostMapping
-    public TravelGoal createGoal(@RequestBody TravelGoal goal) {
-        return repository.save(goal);
+    public ResponseEntity<TravelGoal> createGoal(@RequestBody TravelGoal goal) {
+        if (goal == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        goal.setId(null);
+        if (goal.getTarget() == null) {
+            goal.setTarget(1);
+        }
+        if (goal.getCompleted() == null) {
+            goal.setCompleted(0);
+        }
+        return ResponseEntity.ok(repository.save(goal));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TravelGoal> updateGoal(@PathVariable Long id, @RequestBody TravelGoal updated) {
+        if (updated == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return repository.findById(id).map(existing -> {
-            existing.setTitle(updated.getTitle());
-            existing.setDescription(updated.getDescription());
-            existing.setTarget(updated.getTarget());
-            existing.setCompleted(updated.getCompleted());
-            existing.setCategory(updated.getCategory());
+            if (updated.getTitle() != null) existing.setTitle(updated.getTitle());
+            if (updated.getDescription() != null) existing.setDescription(updated.getDescription());
+            if (updated.getTarget() != null) existing.setTarget(updated.getTarget());
+            if (updated.getCompleted() != null) existing.setCompleted(updated.getCompleted());
+            if (updated.getCategory() != null) existing.setCategory(updated.getCategory());
             return ResponseEntity.ok(repository.save(existing));
         }).orElse(ResponseEntity.notFound().build());
     }
