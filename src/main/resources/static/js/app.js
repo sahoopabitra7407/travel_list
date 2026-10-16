@@ -62,8 +62,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.getElementById('category-filter');
     const tabButtons = document.querySelectorAll('.tab-btn');
 
-    // Init Theme
+    // Authentication States & Elements
+    let currentUser = null;
+    try {
+        currentUser = JSON.parse(localStorage.getItem('wanderlist_auth_user'));
+    } catch (e) {
+        currentUser = null;
+    }
+    let pendingActionAfterAuth = null;
+
+    const authModal = document.getElementById('auth-modal');
+    const authCloseBtn = document.getElementById('auth-close-btn');
+    const tabLoginBtn = document.getElementById('tab-login-btn');
+    const tabRegisterBtn = document.getElementById('tab-register-btn');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const quickDemoLoginBtn = document.getElementById('quick-demo-login-btn');
+    const demoCredsFill = document.getElementById('demo-creds-fill');
+    const authNotice = document.getElementById('auth-notice');
+    const authNoticeText = document.getElementById('auth-notice-text');
+
+    const navAuthLoggedOut = document.getElementById('nav-auth-logged-out');
+    const navAuthLoggedIn = document.getElementById('nav-auth-logged-in');
+    const navLoginBtn = document.getElementById('nav-login-btn');
+    const navRegisterBtn = document.getElementById('nav-register-btn');
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdownMenu = document.getElementById('user-dropdown-menu');
+    const userLogoutBtn = document.getElementById('user-logout-btn');
+    const userDisplayName = document.getElementById('user-display-name');
+    const dropdownName = document.getElementById('dropdown-name');
+    const dropdownEmail = document.getElementById('dropdown-email');
+    const userAvatarImg = document.getElementById('user-avatar-img');
+
+    // Password Criteria & Inputs
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginEmailBadge = document.getElementById('login-email-badge');
+    const loginEmailCheck = document.getElementById('login-email-check');
+    const loginEmailMsg = document.getElementById('login-email-msg');
+    const critLen = document.getElementById('crit-len');
+    const critNum = document.getElementById('crit-num');
+    const critSym = document.getElementById('crit-sym');
+
+    const regNameInput = document.getElementById('reg-name');
+    const regEmailInput = document.getElementById('reg-email');
+    const regPasswordInput = document.getElementById('reg-password');
+    const regStrengthBar = document.getElementById('reg-strength-bar');
+    const regStrengthLabel = document.getElementById('reg-strength-label');
+
+    // Running vehicle
+    const runningBus = document.getElementById('running-bus');
+
+    // Init Theme & Auth State
     initTheme();
+    initAuthUI();
 
     // Fetch and Load Initial Data
     refreshAllData();
@@ -263,80 +315,173 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ==========================================================================
-       MAP MANAGEMENT (LEAFLET)
+       MAP MANAGEMENT (REALISTIC SATELLITE & DETAILED VIEW)
        ========================================================================== */
     let currentTileLayers = [];
+    let currentMapMode = 'satellite';
 
-    function updateMapTileLayer() {
+    const MAP_PROVIDERS = {
+        satellite: {
+            name: 'Realistic Satellite',
+            base: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                options: {
+                    attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
+                    maxZoom: 19
+                }
+            },
+            overlay: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+                options: {
+                    attribution: '',
+                    maxZoom: 19,
+                    pane: 'overlayPane'
+                }
+            }
+        },
+        terrain: {
+            name: 'Topographic Terrain',
+            base: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                options: {
+                    attribution: 'Tiles &copy; Esri &mdash; DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey',
+                    maxZoom: 18
+                }
+            }
+        },
+        natgeo: {
+            name: 'NatGeo World Atlas',
+            base: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
+                options: {
+                    attribution: 'Tiles &copy; National Geographic Society, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+                    maxZoom: 16
+                }
+            }
+        },
+        streets: {
+            name: 'OpenStreetMap Streets',
+            base: {
+                url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                options: {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }
+            }
+        }
+    };
+
+    function updateMapTileLayer(mode = currentMapMode) {
         if (!map) return;
-        currentTileLayers.forEach(l => map.removeLayer(l));
+        currentMapMode = mode;
+        
+        // Remove existing tile layers cleanly
+        currentTileLayers.forEach(l => {
+            try { map.removeLayer(l); } catch (e) { console.warn(e); }
+        });
         currentTileLayers = [];
 
-        const isLight = document.body.classList.contains('light-theme');
-        if (isLight) {
-            const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 18
-            }).addTo(map);
-            currentTileLayers.push(osm);
-        } else {
-            const esriBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-                maxZoom: 16
-            }).addTo(map);
-            const esriRef = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '',
-                maxZoom: 16
-            }).addTo(map);
-            currentTileLayers.push(esriBase, esriRef);
+        const provider = MAP_PROVIDERS[mode] || MAP_PROVIDERS.satellite;
+
+        // Add base satellite / map layer
+        const baseLayer = L.tileLayer(provider.base.url, provider.base.options).addTo(map);
+        currentTileLayers.push(baseLayer);
+
+        // Add reference overlay (borders, coastlines, cities) if provided
+        if (provider.overlay) {
+            const overlayLayer = L.tileLayer(provider.overlay.url, provider.overlay.options).addTo(map);
+            currentTileLayers.push(overlayLayer);
         }
     }
 
     function initMap() {
         if (map) return;
-        // Centralize map viewport
+        // Centralize map viewport with optimal realistic world bounds
         map = L.map('world-map', {
-            center: [20, 0],
-            zoom: 2,
-            minZoom: 1.5,
-            maxZoom: 10
+            center: [22, 12],
+            zoom: 2.2,
+            minZoom: 1.8,
+            maxZoom: 18,
+            zoomControl: false, // Using our custom sleek zoom controls
+            worldCopyJump: true
         });
 
-        updateMapTileLayer();
+        updateMapTileLayer('satellite');
     }
 
     function updateMapMarkers() {
         initMap();
+
+        // Update pin counter badge
+        const pinCountBadge = document.getElementById('map-pin-count');
+        if (pinCountBadge) {
+            pinCountBadge.textContent = `${destinations.length} Pinned`;
+        }
 
         // Clear existing markers
         mapMarkers.forEach(m => map.removeLayer(m));
         mapMarkers = [];
 
         destinations.forEach(dest => {
-            if (dest.latitude === null || dest.longitude === null) return;
+            if (dest.latitude === null || dest.latitude === undefined ||
+                dest.longitude === null || dest.longitude === undefined) return;
 
-            // Pin marker coloring code
-            let color = '#fbbf24'; // Wishlist (Amber)
-            if (dest.status === 'PLANNED') color = '#38bdf8'; // Planned (Blue)
-            if (dest.status === 'VISITED') color = '#10b981'; // Visited (Emerald)
+            const statusClass = (dest.status || 'WISHLIST').toLowerCase();
+            const locationText = dest.city ? `${dest.city}, ${dest.country}` : dest.country;
+            const categoryBadge = dest.category || 'Adventure';
+            const budgetText = dest.budget ? `$${Number(dest.budget).toLocaleString()}` : 'Flexible';
+            const imgUrl = dest.imageUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=600&q=80';
 
+            // High-detail pulsing pin icon
             const customIcon = L.divIcon({
-                className: 'custom-map-pin',
-                html: `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 8px ${color}"></div>`,
-                iconSize: [14, 14]
+                className: 'custom-map-pin-wrapper',
+                html: `
+                    <div class="pin-marker ${statusClass}" title="${escapeHTML(dest.title)}">
+                        <div class="pin-pulse-wave"></div>
+                        <div class="pin-icon-body">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                    </div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 26],
+                popupAnchor: [0, -28]
             });
 
             const marker = L.marker([dest.latitude, dest.longitude], { icon: customIcon }).addTo(map);
             
+            // Rich realistic popup card
             const popupContent = `
                 <div class="map-popup-card">
-                    <h4>${escapeHTML(dest.title)}</h4>
-                    <p><i class="fa-solid fa-map-pin"></i> ${escapeHTML(dest.city ? `${dest.city}, ${dest.country}` : dest.country)}</p>
-                    <span style="color: ${color}">${dest.status}</span>
-                    <div style="font-size: 11px; margin-top: 4px; font-weight: 700; color: #4ade80;">Budget: $${dest.budget || 0}</div>
+                    <div class="map-popup-thumb" style="background-image: url('${imgUrl}');">
+                        <span class="map-popup-badge status-${statusClass}">${dest.status}</span>
+                    </div>
+                    <div class="map-popup-body">
+                        <div class="map-popup-title">${escapeHTML(dest.title)}</div>
+                        <div class="map-popup-loc"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(locationText)}</div>
+                        <div class="map-popup-meta">
+                            <span><i class="fa-solid fa-compass"></i> ${escapeHTML(categoryBadge)}</span>
+                            <span class="map-popup-budget">${budgetText}</span>
+                        </div>
+                        ${dest.notes ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.35;">${escapeHTML(dest.notes.length > 80 ? dest.notes.slice(0, 80) + '...' : dest.notes)}</div>` : ''}
+                        <button class="map-popup-action-btn" data-dest-id="${dest.id}">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Explore Journey
+                        </button>
+                    </div>
                 </div>
             `;
-            marker.bindPopup(popupContent);
+            marker.bindPopup(popupContent, { maxWidth: 260, className: 'leaflet-custom-popup' });
+
+            marker.on('popupopen', () => {
+                const btn = document.querySelector(`.map-popup-action-btn[data-dest-id="${dest.id}"]`);
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        map.closePopup();
+                        openDetailsModal(dest);
+                    });
+                }
+            });
+
             mapMarkers.push(marker);
         });
     }
@@ -731,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('details-hero').style.backgroundImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%), url('${dest.imageUrl || defaultHero}')`;
         document.getElementById('details-title').textContent = dest.title;
         document.getElementById('details-country-tag').textContent = dest.country;
-        document.getElementById('details-city-tag').textContent = dest.city ? `<i class="fa-solid fa-location-dot"></i> ${dest.city}` : '';
+        document.getElementById('details-city-tag').innerHTML = dest.city ? `<i class="fa-solid fa-location-dot"></i> ${dest.city}` : '';
         document.getElementById('details-category-mood').textContent = `${dest.category || 'General'} / ${dest.mood || 'Scenic'}`;
         document.getElementById('details-season').textContent = dest.bestSeason || 'Year-round';
         document.getElementById('details-duration').textContent = dest.duration || 'Flexible';
@@ -966,13 +1111,72 @@ document.addEventListener('DOMContentLoaded', () => {
         // Theme switch
         themeToggleBtn.addEventListener('click', toggleTheme);
 
+        // Nav links: smooth scroll + active state tracking
+        const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').slice(1);
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+        // Intersection Observer to auto-update active nav on scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navLinks.forEach(l => {
+                        const href = l.getAttribute('href');
+                        if (href === `#${id}`) l.classList.add('active');
+                        else l.classList.remove('active');
+                    });
+                }
+            });
+        }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+        sections.forEach(s => navObserver.observe(s));
+
+        // Realistic Map Controls & Layer Switcher
+        document.querySelectorAll('.map-mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.map-mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const layerKey = btn.dataset.layer;
+                updateMapTileLayer(layerKey);
+                const layerName = MAP_PROVIDERS[layerKey]?.name || layerKey;
+                showToast(`Switched map to ${layerName}`, 'info');
+            });
+        });
+
+        // Recenter Map
+        document.getElementById('map-recenter-btn')?.addEventListener('click', () => {
+            if (map) {
+                map.flyTo([22, 12], 2.2, { duration: 1.2, easeLinearity: 0.25 });
+                showToast('Recentered to world overview', 'info');
+            }
+        });
+
+        // Custom Zoom Controls
+        document.getElementById('map-zoom-in')?.addEventListener('click', () => {
+            if (map) map.zoomIn();
+        });
+        document.getElementById('map-zoom-out')?.addEventListener('click', () => {
+            if (map) map.zoomOut();
+        });
+
         // Surprise Engine click
         surpriseBtn.addEventListener('click', handleSurpriseMe);
         document.getElementById('surprise-close-btn').addEventListener('click', () => surpriseModal.classList.add('hidden'));
 
-        // Destinations Open / Close form
-        addDestBtn.addEventListener('click', () => openDestFormModal());
-        emptyAddBtn.addEventListener('click', () => openDestFormModal());
+        // Destinations Open / Close form with Auth Check
+        addDestBtn.addEventListener('click', () => requireAuth(() => openDestFormModal(), 'Please sign in to add a new destination.'));
+        emptyAddBtn.addEventListener('click', () => requireAuth(() => openDestFormModal(), 'Please sign in to add a new destination.'));
         document.getElementById('modal-close-btn').addEventListener('click', () => destModal.classList.add('hidden'));
         document.getElementById('modal-cancel-btn').addEventListener('click', () => destModal.classList.add('hidden'));
         destForm.addEventListener('submit', handleDestFormSubmit);
@@ -980,34 +1184,204 @@ document.addEventListener('DOMContentLoaded', () => {
         // Details Modal Close
         document.getElementById('details-close-btn').addEventListener('click', () => detailsModal.classList.add('hidden'));
 
-        // Goals Modal Open / Close / Save
+        // Goals Modal Open / Close / Save with Auth Check
         addGoalBtn.addEventListener('click', () => {
-            goalForm.reset();
-            goalModal.classList.remove('hidden');
+            requireAuth(() => {
+                goalForm.reset();
+                goalModal.classList.remove('hidden');
+            }, 'Please sign in to set custom travel goals.');
         });
         document.getElementById('goal-close-btn').addEventListener('click', () => goalModal.classList.add('hidden'));
         document.getElementById('goal-cancel-btn').addEventListener('click', () => goalModal.classList.add('hidden'));
         goalForm.addEventListener('submit', handleGoalFormSubmit);
 
-        // Memories Modal Open / Close / Save
+        // Memories Modal Open / Close / Save with Auth Check
         addMemoryBtn.addEventListener('click', () => {
-            memoryForm.reset();
-            populateMemoryDestinationDropdown();
-            memoryModal.classList.remove('hidden');
+            requireAuth(() => {
+                memoryForm.reset();
+                populateMemoryDestinationDropdown();
+                memoryModal.classList.remove('hidden');
+            }, 'Please sign in to save travel memories.');
         });
         document.getElementById('memory-close-btn').addEventListener('click', () => memoryModal.classList.add('hidden'));
         document.getElementById('memory-cancel-btn').addEventListener('click', () => memoryModal.classList.add('hidden'));
         memoryForm.addEventListener('submit', handleMemoryFormSubmit);
 
-        // Expense Modal Open / Close / Save
+        // Expense Modal Open / Close / Save with Auth Check
         addExpenseBtn.addEventListener('click', () => {
-            expenseForm.reset();
-            document.getElementById('expense-dest-id').value = selectedDestId;
-            expenseModal.classList.remove('hidden');
+            requireAuth(() => {
+                expenseForm.reset();
+                document.getElementById('expense-dest-id').value = selectedDestId;
+                expenseModal.classList.remove('hidden');
+            }, 'Please sign in to track trip expenses.');
         });
         document.getElementById('expense-close-btn').addEventListener('click', () => expenseModal.classList.add('hidden'));
         document.getElementById('expense-cancel-btn').addEventListener('click', () => expenseModal.classList.add('hidden'));
         expenseForm.addEventListener('submit', handleExpenseFormSubmit);
+
+        // Authentication & Login Criteria Event Listeners
+        navLoginBtn?.addEventListener('click', () => openAuthModal());
+        navRegisterBtn?.addEventListener('click', () => {
+            openAuthModal();
+            tabRegisterBtn?.click();
+        });
+        authCloseBtn?.addEventListener('click', closeAuthModal);
+
+        tabLoginBtn?.addEventListener('click', () => {
+            tabLoginBtn.classList.add('active');
+            tabRegisterBtn.classList.remove('active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        });
+
+        tabRegisterBtn?.addEventListener('click', () => {
+            tabRegisterBtn.classList.add('active');
+            tabLoginBtn.classList.remove('active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        // Email validation input listener
+        loginEmailInput?.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (validateEmailCriteria(val)) {
+                loginEmailBadge.textContent = '✓ Valid format';
+                loginEmailBadge.className = 'criteria-pill valid';
+                loginEmailCheck?.classList.remove('hidden');
+                loginEmailMsg.textContent = '';
+            } else {
+                loginEmailBadge.textContent = 'Invalid format';
+                loginEmailBadge.className = 'criteria-pill';
+                loginEmailCheck?.classList.add('hidden');
+            }
+        });
+
+        // Live Password criteria checklist listener
+        loginPasswordInput?.addEventListener('input', (e) => {
+            updateLoginCriteriaUI(e.target.value);
+        });
+
+        // Register password strength meter
+        regPasswordInput?.addEventListener('input', (e) => {
+            updateRegisterStrength(e.target.value);
+        });
+
+        // Show/hide password toggles
+        document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const input = document.getElementById(targetId);
+                if (input) {
+                    const isPass = input.type === 'password';
+                    input.type = isPass ? 'text' : 'password';
+                    btn.innerHTML = `<i class="fa-solid ${isPass ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+                }
+            });
+        });
+
+        // Demo credentials auto-fill button
+        demoCredsFill?.addEventListener('click', () => {
+            loginEmailInput.value = 'alex.morgan@wanderlist.io';
+            loginPasswordInput.value = 'Explorer#2026';
+            updateLoginCriteriaUI('Explorer#2026');
+            loginEmailBadge.textContent = '✓ Verified format';
+            loginEmailBadge.className = 'criteria-pill valid';
+            loginEmailCheck?.classList.remove('hidden');
+        });
+
+        // Instant 1-Click Demo Explorer login
+        quickDemoLoginBtn?.addEventListener('click', () => {
+            performLogin({
+                name: 'Alex Morgan',
+                email: 'alex.morgan@wanderlist.io',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                role: 'Pro Explorer'
+            });
+        });
+
+        // Login Form Submit with Criteria Enforcement
+        loginForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = loginEmailInput.value.trim();
+            const pass = loginPasswordInput.value;
+
+            if (!validateEmailCriteria(email)) {
+                showToast('Please enter a valid email address (e.g. name@domain.com)', 'danger');
+                return;
+            }
+
+            const criteria = checkPasswordCriteria(pass);
+            if (!criteria.isFullyCompliant) {
+                showToast('Password must meet all 3 criteria: 8+ chars, number, uppercase/symbol.', 'danger');
+                return;
+            }
+
+            let derivedName = email.split('@')[0].replace(/[._-]/g, ' ');
+            derivedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+
+            performLogin({
+                name: derivedName || 'Explorer',
+                email: email,
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                role: 'Pro Explorer'
+            });
+        });
+
+        // Register Form Submit
+        registerForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = regNameInput.value.trim();
+            const email = regEmailInput.value.trim();
+            const pass = regPasswordInput.value;
+
+            if (!name) {
+                showToast('Please provide your explorer name.', 'danger');
+                return;
+            }
+            if (!validateEmailCriteria(email)) {
+                showToast('Please provide a valid email format.', 'danger');
+                return;
+            }
+            if (pass.length < 8) {
+                showToast('Password must be at least 8 characters long.', 'danger');
+                return;
+            }
+
+            performLogin({
+                name: name,
+                email: email,
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                role: 'Explorer Member'
+            });
+        });
+
+        // User dropdown menu toggle
+        userMenuBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdownMenu?.classList.toggle('hidden');
+            userMenuBtn?.classList.toggle('active');
+        });
+
+        document.addEventListener('click', () => {
+            userDropdownMenu?.classList.add('hidden');
+            userMenuBtn?.classList.remove('active');
+        });
+
+        // Logout
+        userLogoutBtn?.addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('wanderlist_auth_user');
+            initAuthUI();
+            showToast('Signed out of Wanderlist. Safe travels!', 'info');
+        });
+
+        // Road Trip Vehicle Honk interaction
+        runningBus?.addEventListener('click', () => {
+            runningBus.classList.add('honk-active');
+            playHonkSound();
+            showToast('Beep Beep! 🚗💨 Road trip to your next adventure!', 'info');
+            setTimeout(() => runningBus.classList.remove('honk-active'), 650);
+        });
 
         // Filter Tabs (Wishlist, Planned, Visited)
         tabButtons.forEach(btn => {
@@ -1108,6 +1482,163 @@ document.addEventListener('DOMContentLoaded', () => {
         return str.replace(/[&<>'"]/g, 
             tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
         );
+    }
+
+    /* ==========================================================================
+       AUTHENTICATION & LOGIN CRITERIA HELPERS
+       ========================================================================== */
+    function initAuthUI() {
+        if (currentUser) {
+            navAuthLoggedOut?.classList.add('hidden');
+            navAuthLoggedIn?.classList.remove('hidden');
+            if (userDisplayName) userDisplayName.textContent = currentUser.name.split(' ')[0] || 'Explorer';
+            if (dropdownName) dropdownName.textContent = currentUser.name || 'Explorer';
+            if (dropdownEmail) dropdownEmail.textContent = currentUser.email || 'explorer@wanderlist.io';
+            if (currentUser.avatar && userAvatarImg) userAvatarImg.src = currentUser.avatar;
+        } else {
+            navAuthLoggedIn?.classList.add('hidden');
+            navAuthLoggedOut?.classList.remove('hidden');
+        }
+    }
+
+    function requireAuth(callback, noticeMessage = 'Please sign in to proceed.') {
+        if (currentUser) {
+            callback();
+        } else {
+            openAuthModal(noticeMessage, callback);
+        }
+    }
+
+    function openAuthModal(noticeText = '', pendingCallback = null) {
+        pendingActionAfterAuth = pendingCallback;
+        if (noticeText) {
+            authNoticeText.textContent = noticeText;
+            authNotice.classList.remove('hidden');
+        } else {
+            authNotice.classList.add('hidden');
+        }
+        authModal.classList.remove('hidden');
+        setTimeout(() => loginEmailInput?.focus(), 150);
+    }
+
+    function closeAuthModal() {
+        authModal.classList.add('hidden');
+        authNotice.classList.add('hidden');
+    }
+
+    // Login Criteria Validators
+    function validateEmailCriteria(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function checkPasswordCriteria(pass) {
+        const hasLen = pass.length >= 8;
+        const hasNum = /\d/.test(pass);
+        const hasSym = /[!@#$%^&*(),.?":{}|<>A-Z]/.test(pass);
+        return {
+            hasLen,
+            hasNum,
+            hasSym,
+            isFullyCompliant: hasLen && hasNum && hasSym
+        };
+    }
+
+    function updateLoginCriteriaUI(pass) {
+        const { hasLen, hasNum, hasSym } = checkPasswordCriteria(pass);
+        
+        // Length item
+        if (hasLen) {
+            critLen.classList.add('met');
+            critLen.querySelector('i').className = 'fa-solid fa-check';
+        } else {
+            critLen.classList.remove('met');
+            critLen.querySelector('i').className = 'fa-regular fa-circle';
+        }
+
+        // Number item
+        if (hasNum) {
+            critNum.classList.add('met');
+            critNum.querySelector('i').className = 'fa-solid fa-check';
+        } else {
+            critNum.classList.remove('met');
+            critNum.querySelector('i').className = 'fa-regular fa-circle';
+        }
+
+        // Symbol/Upper item
+        if (hasSym) {
+            critSym.classList.add('met');
+            critSym.querySelector('i').className = 'fa-solid fa-check';
+        } else {
+            critSym.classList.remove('met');
+            critSym.querySelector('i').className = 'fa-regular fa-circle';
+        }
+    }
+
+    function updateRegisterStrength(pass) {
+        if (!pass) {
+            regStrengthBar.style.width = '0%';
+            regStrengthBar.style.backgroundColor = 'transparent';
+            regStrengthLabel.textContent = 'Security: Waiting for input';
+            return;
+        }
+
+        let score = 0;
+        if (pass.length >= 8) score++;
+        if (pass.length >= 12) score++;
+        if (/[0-9]/.test(pass)) score++;
+        if (/[A-Z]/.test(pass)) score++;
+        if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pass)) score++;
+
+        if (score <= 2) {
+            regStrengthBar.style.width = '33%';
+            regStrengthBar.style.backgroundColor = '#ef4444';
+            regStrengthLabel.textContent = 'Security: Weak (Needs 8+ characters & numbers)';
+            regStrengthLabel.style.color = '#ef4444';
+        } else if (score <= 4) {
+            regStrengthBar.style.width = '66%';
+            regStrengthBar.style.backgroundColor = '#f59e0b';
+            regStrengthLabel.textContent = 'Security: Medium (Good, add special symbols)';
+            regStrengthLabel.style.color = '#f59e0b';
+        } else {
+            regStrengthBar.style.width = '100%';
+            regStrengthBar.style.backgroundColor = '#10b981';
+            regStrengthLabel.textContent = 'Security: Strong & Secure!';
+            regStrengthLabel.style.color = '#10b981';
+        }
+    }
+
+    function performLogin(userObj) {
+        currentUser = userObj;
+        localStorage.setItem('wanderlist_auth_user', JSON.stringify(currentUser));
+        initAuthUI();
+        closeAuthModal();
+        showToast(`Welcome, ${currentUser.name}! 🌍 Explorer access active.`, 'success');
+
+        if (pendingActionAfterAuth) {
+            const cb = pendingActionAfterAuth;
+            pendingActionAfterAuth = null;
+            setTimeout(() => cb(), 250);
+        }
+    }
+
+    function playHonkSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(420, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.16);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
+        } catch (e) {
+            // Audio context disabled
+        }
     }
 });
 

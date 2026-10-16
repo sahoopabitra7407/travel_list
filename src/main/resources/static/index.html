@@ -15,17 +15,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Custom Style sheet -->
-    <!-- Google Font: League Spartan -->
-    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Design Tokens -->
-    <link rel="stylesheet" href="/css/design-tokens.css">
-    <!-- Component Styles -->
-    <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/hero.css">
-    <link rel="stylesheet" href="/css/services.css">
-    <link rel="stylesheet" href="/css/portfolio.css">
-    <link rel="stylesheet" href="/css/footer.css">
-    <link rel="stylesheet" href="/css/badge.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="dark-theme">
@@ -52,15 +41,48 @@
             <button id="theme-toggle" class="icon-btn" title="Switch Theme">
                 <i class="fa-solid fa-sun"></i>
             </button>
-            <div class="profile-icon">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile">
+
+            <!-- Auth Buttons (When Logged Out) -->
+            <div id="nav-auth-logged-out" class="nav-auth-group">
+                <button id="nav-login-btn" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+                </button>
+                <button id="nav-register-btn" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-compass"></i> Join Free
+                </button>
+            </div>
+
+            <!-- Profile Menu (When Logged In) -->
+            <div id="nav-auth-logged-in" class="user-menu-wrapper hidden">
+                <button id="user-menu-btn" class="user-menu-trigger">
+                    <div class="profile-icon">
+                        <img id="user-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Profile">
+                        <span class="user-status-dot"></span>
+                    </div>
+                    <span id="user-display-name" class="user-display-name">Explorer</span>
+                    <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div id="user-dropdown-menu" class="user-dropdown-card glass hidden animate-pop">
+                    <div class="dropdown-user-header">
+                        <strong id="dropdown-name">Alex Morgan</strong>
+                        <span id="dropdown-email">alex.morgan@wanderlist.io</span>
+                        <span class="explorer-badge"><i class="fa-solid fa-award"></i> Level 3 Explorer</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="#bucket-list" class="dropdown-item"><i class="fa-solid fa-heart"></i> My Bucket List</a>
+                    <a href="#timeline-section" class="dropdown-item"><i class="fa-solid fa-route"></i> My Travel Chronicle</a>
+                    <a href="#goals-section" class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Explorer Goals</a>
+                    <div class="dropdown-divider"></div>
+                    <button id="user-logout-btn" class="dropdown-item danger"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
     <section id="hero" class="hero-section">
-        <div class="hero-bg" style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 100%), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80');"></div>
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
         
         <div class="floating-elements">
             <div class="plane-animation"><i class="fa-solid fa-paper-plane"></i></div>
@@ -68,48 +90,222 @@
             <div class="particle p2"></div>
         </div>
 
-        <div class="hero-content">
-            <span class="hero-subtitle">WANDERLIST Travel Bucket List</span>
-            <h2 class="hero-title">YOUR NEXT ADVENTURE<br>IS WAITING.</h2>
-            <p class="hero-tagline">Collect places. Create memories. Explore the world.</p>
-            
-            <div class="hero-actions">
-                <button id="add-destination-btn" class="btn btn-primary btn-lg">
-                    <i class="fa-solid fa-plus"></i> Add Destination
-                </button>
-                <button id="surprise-me-btn" class="btn btn-secondary btn-lg">
-                    <i class="fa-solid fa-dice"></i> Surprise Me
-                </button>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge-pill">
+                    <span class="pulse-dot"></span>
+                    <span>WANDERLIST TRAVEL TRACKER</span>
+                </div>
+                <h1 class="hero-title">
+                    YOUR NEXT <span class="gradient-text">ADVENTURE</span><br>
+                    IS WAITING.
+                </h1>
+                <p class="hero-tagline">
+                    Curate your ultimate world bucket list, track visited destinations on an interactive map, and turn dream journeys into lifelong memories.
+                </p>
+                
+                <div class="hero-actions">
+                    <button id="add-destination-btn" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-plus"></i> Add Destination
+                    </button>
+                    <button id="surprise-me-btn" class="btn btn-secondary btn-lg">
+                        <i class="fa-solid fa-dice"></i> Surprise Me
+                    </button>
+                </div>
+
+                <div class="hero-highlights">
+                    <div class="highlight-chip">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Interactive 3D Map</span>
+                    </div>
+                    <div class="highlight-chip">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Mood Inspiration</span>
+                    </div>
+                    <div class="highlight-chip">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Budget Planner</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Hero Card: Spotlight Destination -->
+            <div class="hero-spotlight-wrapper">
+                <div class="hero-spotlight-card glass hover-lift">
+                    <div class="spotlight-tag">
+                        <span class="live-dot"></span> Featured Spotlight
+                    </div>
+                    <div class="spotlight-img-box">
+                        <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80" alt="Santorini, Greece" class="spotlight-img">
+                        <div class="spotlight-overlay"></div>
+                        <span class="spotlight-badge"><i class="fa-solid fa-umbrella-beach"></i> Beach & Culture</span>
+                    </div>
+                    <div class="spotlight-details">
+                        <div class="spotlight-top">
+                            <div>
+                                <span class="spotlight-country"><i class="fa-solid fa-location-dot"></i> Greece</span>
+                                <h3 class="spotlight-title">Santorini Sunsets & Oia Cliffs</h3>
+                            </div>
+                            <div class="spotlight-rating">
+                                <i class="fa-solid fa-star"></i> 4.9
+                            </div>
+                        </div>
+                        <p class="spotlight-desc">Whitewashed villages overlooking azure Aegean waters. A quintessential bucket list dream.</p>
+                        <div class="spotlight-meta-row">
+                            <span><i class="fa-solid fa-calendar-days"></i> May – Oct</span>
+                            <span><i class="fa-solid fa-wallet"></i> Est. $2,200</span>
+                            <span class="status-pill visited"><i class="fa-solid fa-check"></i> Top Rated</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating Mini Metric Pill -->
+                <div class="floating-metric-badge glass">
+                    <i class="fa-solid fa-fire"></i>
+                    <div>
+                        <strong>1.2k+ Travelers</strong>
+                        <span>Saved this destination</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animated Road Trip Vehicle & Highway Strip -->
+        <div class="hero-road-track" id="road-track">
+            <!-- Road Horizon line & Scenery Markers -->
+            <div class="road-scenery">
+                <div class="scenery-item milestone-sign sign-1"><i class="fa-solid fa-location-arrow"></i> Kyoto 120km</div>
+                <div class="scenery-item milestone-sign sign-2"><i class="fa-solid fa-location-arrow"></i> Amalfi 85km</div>
+                <div class="scenery-item milestone-sign sign-3"><i class="fa-solid fa-location-arrow"></i> Route 66</div>
+                <div class="scenery-item milestone-sign sign-4"><i class="fa-solid fa-location-arrow"></i> Paris 240km</div>
+                <div class="scenery-item milestone-sign sign-5"><i class="fa-solid fa-location-arrow"></i> Swiss Alps 95km</div>
+            </div>
+
+            <!-- Asphalt Road with Moving Dash Lines -->
+            <div class="asphalt-road">
+                <div class="road-lane-dashes"></div>
+            </div>
+
+            <!-- Animated Running Camper Van / Adventure Bus -->
+            <div class="running-vehicle-wrap" id="running-bus" title="Click to honk! 🚗💨">
+                <div class="vehicle-bubble">
+                    <span class="bubble-text">Road trip to adventure! <i class="fa-solid fa-compass"></i></span>
+                </div>
+
+                <div class="vehicle-bus">
+                    <!-- Headlight beam projection -->
+                    <div class="headlight-beam"></div>
+
+                    <!-- Exhaust Smoke puffs -->
+                    <div class="exhaust-trail">
+                        <span class="smoke-puff puff-1"></span>
+                        <span class="smoke-puff puff-2"></span>
+                        <span class="smoke-puff puff-3"></span>
+                    </div>
+
+                    <!-- SVG Adventure Campervan -->
+                    <svg class="campervan-svg" viewBox="0 0 160 90" width="145" height="80" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="busBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" />
+                                <stop offset="100%" stop-color="#8b5cf6" />
+                            </linearGradient>
+                            <linearGradient id="surfGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#ec4899" />
+                                <stop offset="100%" stop-color="#f59e0b" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Roof Luggage Rack & Surfboard -->
+                        <rect x="35" y="8" width="85" height="4" rx="2" fill="#94a3b8" />
+                        <rect x="42" y="4" width="6" height="5" fill="#64748b" />
+                        <rect x="75" y="4" width="6" height="5" fill="#64748b" />
+                        <rect x="108" y="4" width="6" height="5" fill="#64748b" />
+                        <!-- Surfboard -->
+                        <path d="M 28 6 Q 78 -1 128 6 Q 78 11 28 6 Z" fill="url(#surfGrad)" />
+                        <!-- Suitcases -->
+                        <rect x="45" y="1" width="22" height="7" rx="2" fill="#f59e0b" />
+                        <rect x="72" y="2" width="26" height="6" rx="2" fill="#10b981" />
+
+                        <!-- Main Bus Body (Upper White, Lower Cyan/Purple) -->
+                        <path d="M 18 42 L 20 18 Q 22 12 30 12 L 132 12 Q 146 12 148 24 L 152 42 Z" fill="#ffffff" />
+                        <path d="M 12 42 L 152 42 Q 154 55 150 68 L 16 68 Q 12 55 12 42 Z" fill="url(#busBodyGrad)" />
+                        
+                        <!-- Windshield & Windows -->
+                        <path d="M 124 16 L 144 26 L 140 40 L 122 40 Z" fill="#0f172a" opacity="0.85" />
+                        <rect x="88" y="16" width="30" height="24" rx="3" fill="#0f172a" opacity="0.85" />
+                        <rect x="54" y="16" width="30" height="24" rx="3" fill="#0f172a" opacity="0.85" />
+                        <rect x="24" y="16" width="26" height="24" rx="3" fill="#0f172a" opacity="0.85" />
+
+                        <!-- Driver Silhouette inside window -->
+                        <circle cx="132" cy="28" r="5" fill="#38bdf8" />
+                        <path d="M 126 38 Q 132 33 138 38 Z" fill="#38bdf8" />
+
+                        <!-- Chrome Side Trim & Door Lines -->
+                        <line x1="14" y1="42" x2="152" y2="42" stroke="#e2e8f0" stroke-width="2.5" />
+                        <line x1="86" y1="14" x2="86" y2="66" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+
+                        <!-- Headlights & Taillights -->
+                        <circle cx="151" cy="48" r="5" fill="#fef08a" />
+                        <circle cx="151" cy="48" r="3" fill="#ffffff" />
+                        <rect x="11" y="46" width="4" height="10" rx="2" fill="#ef4444" />
+
+                        <!-- Front Bumper -->
+                        <rect x="146" y="62" width="10" height="6" rx="3" fill="#cbd5e1" />
+                        <!-- Rear Bumper -->
+                        <rect x="8" y="62" width="8" height="6" rx="3" fill="#cbd5e1" />
+
+                        <!-- Wheels (Spinning group) -->
+                        <g class="bus-wheel rear-wheel">
+                            <circle cx="42" cy="68" r="14" fill="#0f172a" />
+                            <circle cx="42" cy="68" r="9" fill="#94a3b8" />
+                            <circle cx="42" cy="68" r="4" fill="#f8fafc" />
+                            <line x1="33" y1="68" x2="51" y2="68" stroke="#ffffff" stroke-width="2" />
+                            <line x1="42" y1="59" x2="42" y2="77" stroke="#ffffff" stroke-width="2" />
+                        </g>
+
+                        <g class="bus-wheel front-wheel">
+                            <circle cx="122" cy="68" r="14" fill="#0f172a" />
+                            <circle cx="122" cy="68" r="9" fill="#94a3b8" />
+                            <circle cx="122" cy="68" r="4" fill="#f8fafc" />
+                            <line x1="113" y1="68" x2="131" y2="68" stroke="#ffffff" stroke-width="2" />
+                            <line x1="122" y1="59" x2="122" y2="77" stroke="#ffffff" stroke-width="2" />
+                        </g>
+                    </svg>
+                </div>
             </div>
         </div>
     </section>
 
-<!-- Services Section -->
-<section id="services" class="services-section reveal-up">
-  <div class="app-container">
-    <div class="section-header center">
-      <span class="section-tag">Our Services</span>
-      <h2>WHAT WE OFFER</h2>
-    </div>
-    <div class="service-grid">
-      <div class="service-card glass">
-        <div class="icon"><i class="fa-solid fa-plane"></i></div>
-        <h3>FLIGHT BOOKING</h3>
-        <p>Find and reserve the best flights for your adventures.</p>
-      </div>
-      <div class="service-card glass">
-        <div class="icon"><i class="fa-solid fa-hotel"></i></div>
-        <h3>HOTEL RESERVATION</h3>
-        <p>Secure comfortable stays at top destinations.</p>
-      </div>
-      <div class="service-card glass">
-        <div class="icon"><i class="fa-solid fa-map"></i></div>
-        <h3>TRIP PLANNING</h3>
-        <p>Tailor-made itineraries to suit any travel style.</p>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- Platform Features Highlight Section -->
+    <section id="features-highlight" class="features-section app-container">
+        <div class="section-header center">
+            <span class="section-tag">Platform Features</span>
+            <h2>BUILT FOR GLOBAL EXPLORERS</h2>
+            <p class="section-desc">Everything you need to visualize, plan, and celebrate your journeys across the globe.</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card glass hover-lift">
+                <div class="feature-icon icon-blue"><i class="fa-solid fa-map-location-dot"></i></div>
+                <h3>Interactive World Map</h3>
+                <p>Pin and visualize your global journeys with custom markers for Wishlist, Planned, and Visited destinations.</p>
+            </div>
+            <div class="feature-card glass hover-lift">
+                <div class="feature-icon icon-purple"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3>Mood-Based Discovery</h3>
+                <p>Filter your adventures by vibes—from mountain trekking and serene beaches to culinary culture and romantic escapes.</p>
+            </div>
+            <div class="feature-card glass hover-lift">
+                <div class="feature-icon icon-emerald"><i class="fa-solid fa-wallet"></i></div>
+                <h3>Budget & Expense Tracking</h3>
+                <p>Track estimated vs. actual expenses across flights, accommodation, dining, and activities to keep trips realistic.</p>
+            </div>
+            <div class="feature-card glass hover-lift">
+                <div class="feature-icon icon-amber"><i class="fa-solid fa-trophy"></i></div>
+                <h3>Milestones & Memories</h3>
+                <p>Unlock achievements as you visit new countries, and build a scrapbook of your favorite moments on the road.</p>
+            </div>
+        </div>
+    </section>
 
     <!-- Travel Statistics Panel -->
     <section id="stats" class="stats-container app-container">
@@ -155,11 +351,39 @@
         </div>
 
         <div class="map-wrapper glass">
+            <!-- Map View Mode Toolbar -->
+            <div class="map-toolbar">
+                <div class="map-mode-selector">
+                    <button class="map-mode-btn active" data-layer="satellite" title="High-res Realistic Satellite & Aerial Photography">
+                        <i class="fa-solid fa-satellite"></i> <span>Realistic Satellite</span>
+                    </button>
+                    <button class="map-mode-btn" data-layer="terrain" title="Topographic Physical Terrain & Mountains">
+                        <i class="fa-solid fa-mountain-sun"></i> <span>Physical Terrain</span>
+                    </button>
+                    <button class="map-mode-btn" data-layer="natgeo" title="National Geographic Explorer Atlas">
+                        <i class="fa-solid fa-compass"></i> <span>NatGeo Atlas</span>
+                    </button>
+                    <button class="map-mode-btn" data-layer="streets" title="Detailed Street & Regional Map">
+                        <i class="fa-solid fa-road"></i> <span>Street Map</span>
+                    </button>
+                </div>
+                <div class="map-quick-actions">
+                    <button id="map-recenter-btn" class="map-action-pill" title="Reset World View">
+                        <i class="fa-solid fa-earth-americas"></i> <span>Reset View</span>
+                    </button>
+                    <button id="map-zoom-in" class="map-action-pill icon-only" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+                    <button id="map-zoom-out" class="map-action-pill icon-only" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+                </div>
+            </div>
+
             <div id="world-map" class="world-map"></div>
+
             <div class="map-legend">
                 <div class="legend-item"><span class="legend-dot badge-wishlist"></span> Wishlist</div>
                 <div class="legend-item"><span class="legend-dot badge-planned"></span> Planned</div>
                 <div class="legend-item"><span class="legend-dot badge-visited"></span> Visited</div>
+                <div class="legend-divider"></div>
+                <div class="legend-count"><i class="fa-solid fa-location-dot"></i> <span id="map-pin-count">0</span> Pinned</div>
             </div>
         </div>
     </section>
@@ -719,6 +943,190 @@
             </form>
         </div>
     </div>
+
+    <!-- Authentication / Login Modal with Criteria -->
+    <div id="auth-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass auth-modal-content animate-pop">
+            <button id="auth-close-btn" class="icon-btn modal-close-pos"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="auth-header">
+                <div class="brand">
+                    <span class="brand-plane"><i class="fa-solid fa-plane-departure"></i></span>
+                    <div class="brand-text">
+                        <h2>WANDERLIST</h2>
+                        <p>Explorer Access</p>
+                    </div>
+                </div>
+                <div class="auth-tabs">
+                    <button id="tab-login-btn" class="auth-tab-btn active">Sign In</button>
+                    <button id="tab-register-btn" class="auth-tab-btn">Create Account</button>
+                </div>
+            </div>
+
+            <!-- Notice when user is redirected to login -->
+            <div id="auth-notice" class="auth-notice hidden">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span id="auth-notice-text">Please sign in to save items to your personal bucket list.</span>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="modal-form auth-form">
+                <div class="form-group">
+                    <label for="login-email">
+                        Email Address
+                        <span id="login-email-badge" class="criteria-pill"><i class="fa-solid fa-circle-info"></i> Valid format</span>
+                    </label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" id="login-email" placeholder="explorer@wanderlist.io" required autocomplete="email">
+                        <span id="login-email-check" class="validation-status-icon hidden"><i class="fa-solid fa-check"></i></span>
+                    </div>
+                    <span id="login-email-msg" class="field-feedback-text"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="login-password">Password</label>
+                        <a href="javascript:void(0)" id="demo-creds-fill" class="text-link">Auto-fill Demo</a>
+                    </div>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                        <button type="button" class="password-toggle-btn" data-target="login-password" title="Show/Hide Password">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password criteria checklist -->
+                <div class="criteria-card">
+                    <div class="criteria-title"><i class="fa-solid fa-list-check"></i> Login Security Criteria</div>
+                    <div class="criteria-item" id="crit-len">
+                        <i class="fa-regular fa-circle"></i>
+                        <span>At least 8 characters in length</span>
+                    </div>
+                    <div class="criteria-item" id="crit-num">
+                        <i class="fa-regular fa-circle"></i>
+                        <span>Includes at least one digit (0-9)</span>
+                    </div>
+                    <div class="criteria-item" id="crit-sym">
+                        <i class="fa-regular fa-circle"></i>
+                        <span>Includes uppercase or special character (!@#$)</span>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-label">
+                        <input type="checkbox" id="login-remember" checked>
+                        <span>Remember my explorer profile</span>
+                    </label>
+                </div>
+
+                <button type="submit" id="login-submit-btn" class="btn btn-primary btn-block">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Wanderlist
+                </button>
+
+                <div class="auth-divider">
+                    <span>OR INSTANT ACCESS</span>
+                </div>
+
+                <button type="button" id="quick-demo-login-btn" class="btn btn-secondary btn-block">
+                    <i class="fa-solid fa-bolt" style="color: var(--accent-amber);"></i> Continue as Demo Explorer
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="modal-form auth-form hidden">
+                <div class="form-group">
+                    <label for="reg-name">Full Explorer Name *</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="reg-name" placeholder="e.g. Alex Morgan" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-email">Email Address *</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" id="reg-email" placeholder="alex@wanderlist.io" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Create Secure Password *</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="reg-password" placeholder="At least 8 characters..." required>
+                        <button type="button" class="password-toggle-btn" data-target="reg-password" title="Show/Hide Password">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <!-- Password strength bar -->
+                    <div class="strength-meter-wrap">
+                        <div class="strength-meter">
+                            <div class="strength-bar" id="reg-strength-bar"></div>
+                        </div>
+                        <span class="strength-label" id="reg-strength-label">Security: Waiting for input</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="register-submit-btn" class="btn btn-primary btn-block">
+                    <i class="fa-solid fa-user-plus"></i> Create Explorer Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="app-footer">
+        <div class="app-container footer-content">
+            <div class="footer-brand">
+                <div class="brand" onclick="scrollToSection('hero')">
+                    <span class="brand-plane"><i class="fa-solid fa-plane-departure"></i></span>
+                    <div class="brand-text">
+                        <h2>WANDERLIST</h2>
+                        <p>Your World. Your Dreams. Your Next Adventure.</p>
+                    </div>
+                </div>
+                <p class="footer-mission">
+                    Empowering global dreamers to map unchartered destinations, track country milestones, and celebrate lifetime travel stories.
+                </p>
+            </div>
+
+            <div class="footer-links-group">
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <a href="#hero">Home</a>
+                    <a href="#features-highlight">Features</a>
+                    <a href="#map-section">Interactive Map</a>
+                    <a href="#bucket-list">Bucket List</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Explore</h4>
+                    <a href="#timeline-section">Journey Timeline</a>
+                    <a href="#goals-section">Travel Goals</a>
+                    <a href="#memories-section">Memory Pinboard</a>
+                    <a href="/h2-console" target="_blank">H2 Database</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Wanderlust</h4>
+                    <p class="quote-text">"The world is a book and those who do not travel read only one page."</p>
+                    <p class="quote-text" style="margin-top: 8px;">— Saint Augustine</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom app-container">
+            <p>&copy; 2026 WANDERLIST. All rights reserved. Crafted for global adventurers.</p>
+            <div class="footer-socials">
+                <span class="social-icon" title="Instagram"><i class="fa-brands fa-instagram"></i></span>
+                <span class="social-icon" title="Twitter"><i class="fa-brands fa-x-twitter"></i></span>
+                <span class="social-icon" title="Pinterest"><i class="fa-brands fa-pinterest"></i></span>
+                <span class="social-icon" title="GitHub"><i class="fa-brands fa-github"></i></span>
+            </div>
+        </div>
+    </footer>
 
     <!-- Toast Toast Container -->
     <div id="toast-container" class="toast-container"></div>
