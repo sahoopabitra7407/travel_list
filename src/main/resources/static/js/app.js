@@ -1379,7 +1379,13 @@ document.addEventListener('DOMContentLoaded', () => {
         runningBus?.addEventListener('click', () => {
             runningBus.classList.add('honk-active');
             playHonkSound();
-            showToast('Beep Beep! 🚗💨 Road trip to your next adventure!', 'info');
+            const honkPhrases = [
+                'Beep Beep! 🚐💨 Road trip to your next adventure!',
+                'Honk Honk! 🎒 Mountain roads are calling!',
+                'Toot Toot! 🌊 Coastal scenic route awaits!'
+            ];
+            const phrase = honkPhrases[Math.floor(Math.random() * honkPhrases.length)];
+            showToast(phrase, 'info');
             setTimeout(() => runningBus.classList.remove('honk-active'), 650);
         });
 
@@ -1622,22 +1628,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function playHonkSound() {
+    // Preloaded high-fidelity audio pool for instantaneous low-latency playback
+    let hornSoundToggle = 0;
+    const hornAudioPool = [
+        new Audio('/sounds/bus-horn.wav'),
+        new Audio('/sounds/bus-horn-vintage.wav')
+    ];
+    hornAudioPool.forEach(a => {
+        a.preload = 'auto';
+        a.volume = 0.85;
+    });
+
+    function playSynthesizedHorn() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(420, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.16);
-            gain.gain.setValueAtTime(0.12, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.2);
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+            
+            // Frequencies for a warm European dual-tone automotive horn:
+            // Low horn: 349.2 Hz (F4), High horn: 440.0 Hz (A4)
+            const freqs = [349.2, 440.0];
+            const now = ctx.currentTime;
+            
+            const masterGain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(2400, now);
+            filter.Q.setValueAtTime(2.0, now);
+
+            masterGain.connect(filter);
+            filter.connect(ctx.destination);
+
+            // Double cheerful honk envelope:
+            // Beep 1 (0 to 140ms), Pause (50ms), Beep 2 (190ms to 400ms)
+            masterGain.gain.setValueAtTime(0, now);
+            // Pulse 1
+            masterGain.gain.linearRampToValueAtTime(0.22, now + 0.02);
+            masterGain.gain.setValueAtTime(0.22, now + 0.12);
+            masterGain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+            // Gap
+            masterGain.gain.setValueAtTime(0.001, now + 0.18);
+            // Pulse 2
+            masterGain.gain.linearRampToValueAtTime(0.25, now + 0.20);
+            masterGain.gain.setValueAtTime(0.25, now + 0.35);
+            masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+
+            freqs.forEach(baseFreq => {
+                // Brass fundamental
+                const osc = ctx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(baseFreq, now);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.99, now + 0.42);
+                
+                const g = ctx.createGain();
+                g.gain.setValueAtTime(0.45, now);
+                osc.connect(g);
+                g.connect(masterGain);
+                
+                osc.start(now);
+                osc.stop(now + 0.46);
+
+                // 2nd Harmonic for brass warmth
+                const osc2 = ctx.createOscillator();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(baseFreq * 2, now);
+                const g2 = ctx.createGain();
+                g2.gain.setValueAtTime(0.22, now);
+                osc2.connect(g2);
+                g2.connect(masterGain);
+
+                osc2.start(now);
+                osc2.stop(now + 0.46);
+            });
         } catch (e) {
             // Audio context disabled
+        }
+    }
+
+    function playHonkSound() {
+        try {
+            const audio = hornAudioPool[hornSoundToggle % hornAudioPool.length];
+            hornSoundToggle++;
+            audio.currentTime = 0;
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    playSynthesizedHorn();
+                });
+            }
+        } catch (e) {
+            playSynthesizedHorn();
         }
     }
 });
