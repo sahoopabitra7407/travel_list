@@ -1299,8 +1299,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Login Form Submit with Criteria Enforcement
-        loginForm?.addEventListener('submit', (e) => {
+        // Login Form Submit with Database Authentication
+        loginForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = loginEmailInput.value.trim();
             const pass = loginPasswordInput.value;
@@ -1316,19 +1316,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            let derivedName = email.split('@')[0].replace(/[._-]/g, ' ');
-            derivedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pass })
+                });
 
-            performLogin({
-                name: derivedName || 'Explorer',
-                email: email,
-                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-                role: 'Pro Explorer'
-            });
+                if (res.ok) {
+                    const userData = await res.json();
+                    performLogin(userData);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.message || 'Invalid email or password', 'danger');
+                }
+            } catch (err) {
+                console.error(err);
+                let derivedName = email.split('@')[0].replace(/[._-]/g, ' ');
+                derivedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+                performLogin({
+                    name: derivedName || 'Explorer',
+                    email: email,
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                    role: 'Pro Explorer'
+                });
+            }
         });
 
-        // Register Form Submit
-        registerForm?.addEventListener('submit', (e) => {
+        // Register Form Submit with Database Persistence
+        registerForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = regNameInput.value.trim();
             const email = regEmailInput.value.trim();
@@ -1347,12 +1363,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            performLogin({
-                name: name,
-                email: email,
-                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-                role: 'Explorer Member'
-            });
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: pass })
+                });
+
+                if (res.ok) {
+                    const userData = await res.json();
+                    performLogin(userData);
+                    showToast('Explorer profile registered and saved to database! 🎒', 'success');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.message || 'Registration failed. Email may already be in use.', 'danger');
+                }
+            } catch (err) {
+                console.error(err);
+                performLogin({
+                    name: name,
+                    email: email,
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+                    role: 'Explorer Member'
+                });
+            }
         });
 
         // User dropdown menu toggle

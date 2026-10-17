@@ -4,10 +4,12 @@ import com.example.travel.model.Destination;
 import com.example.travel.model.TravelGoal;
 import com.example.travel.model.TravelMemory;
 import com.example.travel.model.TripExpense;
+import com.example.travel.model.User;
 import com.example.travel.repository.DestinationRepository;
 import com.example.travel.repository.TravelGoalRepository;
 import com.example.travel.repository.TravelMemoryRepository;
 import com.example.travel.repository.TripExpenseRepository;
+import com.example.travel.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +25,21 @@ public class DataInitializer {
             DestinationRepository destinationRepository,
             TravelGoalRepository goalRepository,
             TravelMemoryRepository memoryRepository,
-            TripExpenseRepository expenseRepository) {
+            TripExpenseRepository expenseRepository,
+            UserRepository userRepository) {
         
         return args -> {
+            // 0. Initialize Default User
+            if (userRepository.count() == 0) {
+                userRepository.save(User.builder()
+                        .name("Alex Morgan")
+                        .email("alex.morgan@wanderlist.io")
+                        .password("Explorer#2026")
+                        .avatar("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80")
+                        .role("Pro Explorer")
+                        .build());
+            }
+
             // 1. Initialize Destinations
             if (destinationRepository.count() == 0) {
                 Destination kyoto = Destination.builder()
